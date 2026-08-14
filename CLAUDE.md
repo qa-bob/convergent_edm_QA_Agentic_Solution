@@ -60,6 +60,7 @@ npm test                    # Run all tests
 npm run test:smoke          # @smoke tests only
 npm run test:navigation     # @navigation tests only
 npm run test:forms          # @forms tests only
+npm run test:functional     # @functional tests only
 npm run test:visual         # @visual tests only
 npm run test:responsive     # @responsive tests only
 npm run baseline            # Update visual snapshots
@@ -132,12 +133,25 @@ tests/
   forms/
     contact-form.spec.ts
   functional/
-    <feature>.spec.ts     # One file per business feature area
+    content-sections.spec.ts  # Headings, CTAs, footer, SEO meta, favicon
   visual/
     visual-regression.spec.ts
   responsive/
     layout.spec.ts
 ```
+
+---
+
+## Path-Scoped Rules
+
+Additional rules scoped to specific directories are defined in `.claude/rules/`:
+
+- `@.claude/rules/testing.md` — rules that apply when writing or editing `tests/**/*.spec.ts`
+- `@.claude/rules/page-objects.md` — rules that apply when writing or editing `src/pages/**/*.ts`
+
+@.claude/rules/testing.md
+
+@.claude/rules/page-objects.md
 
 ---
 

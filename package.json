@@ -7,6 +7,7 @@
     "test:smoke": "playwright test --grep @smoke",
     "test:navigation": "playwright test --grep @navigation",
     "test:forms": "playwright test --grep @forms",
+    "test:functional": "playwright test --grep @functional",
     "test:visual": "playwright test --grep @visual",
     "test:responsive": "playwright test --grep @responsive",
     "test:headed": "playwright test --headed",
