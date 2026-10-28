@@ -33,13 +33,10 @@ test.describe('Homepage Content @functional', () => {
     const h2 = page.locator('h2').first();
 
     const h1Count = await h1.count();
-    if (h1Count === 0) {
-      console.warn('[functional] No H1 found — skipping hierarchy check');
-      return;
-    }
+    test.skip(h1Count === 0, 'No H1 found');
 
     const h2Count = await h2.count();
-    if (h2Count === 0) return; // H1 only is fine
+    test.skip(h2Count === 0, 'No H2 found — H1 only is fine');
 
     // If both exist, verify H1 comes before H2 in DOM order
     const h1Box = await h1.boundingBox();
@@ -97,7 +94,7 @@ test.describe('Homepage Content @functional', () => {
 
   test('CTA buttons have non-generic text @functional', async ({ homePage }) => {
     const ctaButtons = await homePage.getCTAButtons();
-    if (ctaButtons.length === 0) return; // Covered by presence test
+    test.skip(ctaButtons.length === 0, 'No CTA buttons found'); // Covered by presence test
 
     const genericPhrases = /^(click here|here|button|link|more)$/i;
     for (const btn of ctaButtons) {
@@ -114,7 +111,7 @@ test.describe('Homepage Content @functional', () => {
 test.describe('Footer @functional', () => {
   test.beforeEach(async ({ page, siteConfig }) => {
     await page.goto(siteConfig.url, { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
   });
 
   test('footer is present on the page @functional', async ({ page }) => {
@@ -125,10 +122,7 @@ test.describe('Footer @functional', () => {
 
   test('footer contains copyright text @functional', async ({ page }) => {
     const footer = page.locator('footer, [role="contentinfo"]').first();
-    if (await footer.count() === 0) {
-      console.warn('[functional] No footer element found — skipping copyright check');
-      return;
-    }
+    test.skip(await footer.count() === 0, 'No footer element found');
 
     const footerText = (await footer.textContent()) ?? '';
     const hasCopyright =
@@ -145,10 +139,7 @@ test.describe('Footer @functional', () => {
 
   test('footer contains links @functional', async ({ page }) => {
     const footer = page.locator('footer, [role="contentinfo"]').first();
-    if (await footer.count() === 0) {
-      console.warn('[functional] No footer element found — skipping link check');
-      return;
-    }
+    test.skip(await footer.count() === 0, 'No footer element found');
 
     const footerLinks = await footer.locator('a[href]').all();
     expect(
@@ -159,7 +150,7 @@ test.describe('Footer @functional', () => {
 
   test('footer links have accessible text @functional', async ({ page }) => {
     const footer = page.locator('footer, [role="contentinfo"]').first();
-    if (await footer.count() === 0) return;
+    test.skip(await footer.count() === 0, 'No footer element found');
 
     const footerLinks = await footer.locator('a').all();
     const emptyLinks: string[] = [];
@@ -205,9 +196,8 @@ test.describe('SEO Meta Tags @functional', () => {
   });
 
   test('page has a meta description @functional', async ({ page, siteConfig }) => {
-    const metaDesc = await page
-      .locator('meta[name="description"]')
-      .getAttribute('content');
+    const metaTag = page.locator('meta[name="description"]').first();
+    const metaDesc = (await metaTag.count()) > 0 ? await metaTag.getAttribute('content') : null;
 
     if (!metaDesc || metaDesc.trim().length === 0) {
       console.warn(
@@ -227,9 +217,13 @@ test.describe('SEO Meta Tags @functional', () => {
   });
 
   test('page has Open Graph meta tags for social sharing @functional', async ({ page }) => {
-    const ogTitle = await page.locator('meta[property="og:title"]').getAttribute('content');
-    const ogDescription = await page.locator('meta[property="og:description"]').getAttribute('content');
-    const ogUrl = await page.locator('meta[property="og:url"]').getAttribute('content');
+    const metaContent = async (selector: string): Promise<string | null> => {
+      const tag = page.locator(selector).first();
+      return (await tag.count()) > 0 ? tag.getAttribute('content') : null;
+    };
+    const ogTitle = await metaContent('meta[property="og:title"]');
+    const ogDescription = await metaContent('meta[property="og:description"]');
+    const ogUrl = await metaContent('meta[property="og:url"]');
 
     if (!ogTitle) {
       console.warn('[functional] Missing og:title — social media shares will show generic text');
@@ -271,9 +265,8 @@ test.describe('SEO Meta Tags @functional', () => {
   });
 
   test('page has a canonical URL tag @functional', async ({ page, siteConfig }) => {
-    const canonical = await page
-      .locator('link[rel="canonical"]')
-      .getAttribute('href');
+    const canonicalTag = page.locator('link[rel="canonical"]').first();
+    const canonical = (await canonicalTag.count()) > 0 ? await canonicalTag.getAttribute('href') : null;
 
     if (!canonical) {
       console.warn(
@@ -293,7 +286,7 @@ test.describe('SEO Meta Tags @functional', () => {
 test.describe('External Links @functional', () => {
   test('external links have rel="noopener" for security @functional', async ({ page, siteConfig }) => {
     await page.goto(siteConfig.url, { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const siteOrigin = new URL(siteConfig.url).origin;
 
